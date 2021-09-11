@@ -1,0 +1,12 @@
+traffic      - get tencent lighthouse instance traffic info
+echo         - get user ID chat ID username
+if_bot_started - judge if bot started
+clockin      - clock in OA system
+weather      - get weather of any city you named
+weather_hangzhou - get weather of Hangzhou
+exchange_rate - get default exchange rate USD/CNY from unionPay
+exchange_rate_query - get specific exchange rate pair from unionPay
+exchange_rate_freecurrency - get exchange rate from freecurrency
+exchange_rate_oanda - get exchange rate from oanda
+crypto_currency_stats - get crypto currency stats from okex
+crypto_currency_reports - get crypto currency reports recently
