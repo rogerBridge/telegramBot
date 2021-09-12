@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/valyala/fasthttp"
@@ -374,7 +375,7 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 				reportString += "\n"
 			}
 			// reset sendTimesCount is no new reportString generated
-			if reportString == "\n" && lastSendTimestampMap[v].SendTimesCount != 0 {
+			if len(strings.ReplaceAll(reportString, "\n", "")) == 0 && lastSendTimestampMap[v].SendTimesCount != 0 {
 				lastSendTimestampMap[v].SendTimesCount = 0
 			}
 		}
