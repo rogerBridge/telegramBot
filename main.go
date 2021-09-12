@@ -173,7 +173,7 @@ func main() {
 	})
 
 	b.Handle("/crypto_currency_stats", func(m *tb.Message) {
-		data, err := components.ProcessSpecificTicker("BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT")
+		data, err := components.ProcessSpecificTicker(followProductID...)
 		if err != nil {
 			b.Reply(m, err.Error())
 			return
@@ -182,7 +182,7 @@ func main() {
 	})
 
 	b.Handle("/crypto_currency_reports", func(m *tb.Message) {
-		s := components.AnalysisSpecificTickers("BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT")
+		s := components.AnalysisSpecificTickers(followProductID...)
 		b.Reply(m, s)
 	})
 
