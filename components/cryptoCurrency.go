@@ -298,9 +298,7 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
-					}
-
-					if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+					} else if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
@@ -321,9 +319,7 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
-					}
-
-					if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+					} else if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
@@ -344,9 +340,7 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
-					}
-
-					if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+					} else if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
@@ -367,9 +361,7 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
-					}
-
-					if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+					} else if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
@@ -380,7 +372,7 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 				reportString += "\n"
 				continue
 			}
-			// 
+			// reset sendTimesCount is no new reportString generated
 			if reportString == "\n" && lastSendTimestampMap[v].SendTimesCount != 0 {
 				lastSendTimestampMap[v].SendTimesCount = 0
 			}
