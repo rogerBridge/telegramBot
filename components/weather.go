@@ -215,21 +215,28 @@ func GetGeocodingByName(cityName string) ([]*Geocoding, error) {
 	return result, nil
 }
 
-func WeatherDaemon(b *tb.Bot) {
+func WeatherDaemon(b *tb.Bot, cityName string) {
 	var myGroup = &tb.User{ID: -1001524256686}
-	city := &City{
-		Name: "Hangzhou",
-		Lat:  30.2937,
-		Lng:  120.1614,
-	}
+	// get city info by cityName
 	log.Println("weather bot daemon ...")
 	// every new start, get a weather data and send to myGroup
-	data, err := GetWeather(city)
+	geocodings, err := GetGeocodingByName(cityName)
 	if err != nil {
 		b.Send(myGroup, err)
 		return
 	}
-	currentWeather := fmt.Sprintf("%s temprature:%.2f°C\nFeels like:%.2f°C\nWind speed: %.2fm/s\nWeather: %s\nTimezone: %s\nTime offset: %dh\n", city.Name,
+	geocoding := geocodings[0]
+	queryCity := &City{
+		Name: geocoding.Name,
+		Lat:  geocoding.Lat,
+		Lng:  geocoding.Lon,
+	}
+	data, err := GetWeather(queryCity)
+	if err != nil {
+		b.Send(myGroup, err)
+		return
+	}
+	currentWeather := fmt.Sprintf("%s temprature:%.2f°C\nFeels like:%.2f°C\nWind speed: %.2fm/s\nWeather: %s\nTimezone: %s\nTime offset: %dh\n", cityName,
 		data.Current.Temp+KELVIN, data.Current.FeelsLike+KELVIN, data.Current.WindSpeed, data.Current.WeatherList[0].Main, data.Timezone, data.TimezoneOffset/3600)
 	b.Send(myGroup, currentWeather)
 
@@ -244,7 +251,7 @@ func WeatherDaemon(b *tb.Bot) {
 		case 23, 0, 1, 2, 3, 4, 5, 6:
 		case 8, 18:
 			if m == 0 {
-				weather, err := GetWeather(city)
+				weather, err := GetWeather(queryCity)
 				if err != nil {
 					b.Send(myGroup, err.Error())
 				} else {
@@ -258,7 +265,7 @@ func WeatherDaemon(b *tb.Bot) {
 		default:
 			// future 3 hours
 			if m == 0 {
-				weather, err := GetWeather(city)
+				weather, err := GetWeather(queryCity)
 				if err != nil {
 					b.Send(myGroup, err.Error())
 				} else {
@@ -270,7 +277,9 @@ func WeatherDaemon(b *tb.Bot) {
 				}
 			}
 		}
-		b.Send(myGroup, processRainList(rainList))
+		if len(rainList) > 0 {
+			b.Send(myGroup, processRainList(rainList))
+		}
 		time.Sleep(time.Minute)
 	}
 }

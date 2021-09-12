@@ -46,6 +46,8 @@ type BotConfig struct {
 	TencentKeyTwo    string       `json:"tencentKeyTwo"`
 	CompareRange     CompareRange `json:"compareRange"`
 	FollowProductIDs []string     `json:"followProductIDs"`
+	StatsProductIDs  []string     `json:"statsProductIDs"`
+	FollowCity       string       `json:"followCity"`
 }
 
 type CompareRange struct {

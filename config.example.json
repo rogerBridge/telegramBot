@@ -7,5 +7,7 @@
     "max": 1.05,
     "min": 0.95
   },
-  "followProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"]
+  "followProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"],
+  "statsProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"],
+  "followCity": "Hangzhou"
 }

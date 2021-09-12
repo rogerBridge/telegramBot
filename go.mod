@@ -4,8 +4,6 @@ go 1.16
 
 require (
 	github.com/breml/rootcerts v0.1.0
-	github.com/buger/jsonparser v1.1.1
-	github.com/leo2n/selfTools v0.0.4
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.228
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/lighthouse v1.0.228
 	github.com/valyala/fasthttp v1.29.0

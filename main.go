@@ -17,10 +17,11 @@ import (
 func main() {
 	components.InitSqlite()
 
-	followProductID := components.Config.FollowProductIDs
+	followProductIDs := components.Config.FollowProductIDs
+	statsProductIDs := components.Config.StatsProductIDs
 	// timing delete outdated ticker data
-	go components.DeleteOutdateTickerTiming(followProductID...)
-	go components.CreateSpecificTickersContinuousToSqlite(followProductID...)
+	go components.DeleteOutdateTickerTiming(followProductIDs...)
+	go components.CreateSpecificTickersContinuousToSqlite(followProductIDs...)
 
 	e := new(components.ExchangeRateCache)
 	ee := new(components.ExchangeMajor)
@@ -28,9 +29,9 @@ func main() {
 	b := components.NewBot()
 
 	// !Daemon
-	go components.WeatherDaemon(b)
+	go components.WeatherDaemon(b, components.Config.FollowCity)
 	go components.ExchangeDaemon(b)
-	go components.CryptoCurrencyDaemon(b, followProductID...)
+	go components.CryptoCurrencyDaemon(b, followProductIDs...)
 	// !Daemon
 
 	b.Handle("/hello", func(m *tb.Message) {
@@ -173,7 +174,7 @@ func main() {
 	})
 
 	b.Handle("/crypto_currency_stats", func(m *tb.Message) {
-		data, err := components.ProcessSpecificTicker(followProductID...)
+		data, err := components.ProcessSpecificTicker(statsProductIDs...)
 		if err != nil {
 			b.Reply(m, err.Error())
 			return
@@ -182,7 +183,7 @@ func main() {
 	})
 
 	b.Handle("/crypto_currency_reports", func(m *tb.Message) {
-		s := components.AnalysisSpecificTickers(followProductID...)
+		s := components.AnalysisSpecificTickers(followProductIDs...)
 		b.Reply(m, s)
 	})
 
