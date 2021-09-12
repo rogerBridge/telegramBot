@@ -279,8 +279,9 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 	for _, v := range args {
 		lastSendTimestampMap[v] = new(Flag)
 	}
-	const INTERVAL_ONE = 120
-	const INTERVAL_TWO = 600
+	const INTERVAL_ONE = 2 * 60
+	const INTERVAL_TWO = 30 * 60
+	const NOTIFY_NUM = 1
 
 	for {
 		sendFlag := false
@@ -293,17 +294,16 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 				readyForAnalysis := tickers[:FIVE_MINUTES]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 5 min "+v, 0.025)
 				if r != "" {
+					reportString += r
 					// first 3 times, push interval 2mins, then, push interval 10mins
-					if lastSendTimestampMap[v].SendTimesCount < 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
+					if lastSendTimestampMap[v].SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
-						reportString += r
-					} else if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+					} else if lastSendTimestampMap[v].SendTimesCount >= NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
-						reportString += r
 					} else {
 						log.Println("don't match send condition", lastSendTimestampMap[v])
 					}
@@ -314,17 +314,16 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 				readyForAnalysis := tickers[:ONE_HOUR]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 1 hour "+v, 0.05)
 				if r != "" {
+					reportString += r
 					// first 3 times, push interval 2mins, then, push interval 10mins
-					if lastSendTimestampMap[v].SendTimesCount < 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
+					if lastSendTimestampMap[v].SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
-						reportString += r
-					} else if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+					} else if lastSendTimestampMap[v].SendTimesCount >= NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
-						reportString += r
 					} else {
 						log.Println("don't match send condition", lastSendTimestampMap[v])
 					}
@@ -335,17 +334,16 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 				readyForAnalysis := tickers[:ONE_DAY]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 1 day "+v, 0.1)
 				if r != "" {
+					reportString += r
 					// first 3 times, push interval 2mins, then, push interval 10mins
-					if lastSendTimestampMap[v].SendTimesCount < 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
+					if lastSendTimestampMap[v].SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
-						reportString += r
-					} else if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+					} else if lastSendTimestampMap[v].SendTimesCount >= NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
-						reportString += r
 					} else {
 						log.Println("don't match send condition", lastSendTimestampMap[v])
 					}
@@ -356,17 +354,16 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 				readyForAnalysis := tickers[:ONE_WEEK]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last one week "+v, 0.2)
 				if r != "" {
+					reportString += r
 					// first 3 times, push interval 2mins, then, push interval 10mins
-					if lastSendTimestampMap[v].SendTimesCount < 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
+					if lastSendTimestampMap[v].SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
-						reportString += r
-					} else if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+					} else if lastSendTimestampMap[v].SendTimesCount >= NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
 						sendFlag = true
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
-						reportString += r
 					} else {
 						log.Println("don't match send condition", lastSendTimestampMap[v])
 					}
@@ -374,6 +371,7 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 			} else {
 				reportString += "\n"
 			}
+
 			// reset sendTimesCount is no new reportString generated
 			if len(strings.ReplaceAll(reportString, "\n", "")) == 0 && lastSendTimestampMap[v].SendTimesCount != 0 {
 				lastSendTimestampMap[v].SendTimesCount = 0
