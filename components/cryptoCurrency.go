@@ -303,10 +303,10 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
+					} else {
+						log.Println("don't match send condition", lastSendTimestampMap[v])
 					}
 				}
-			} else {
-				continue
 			}
 
 			if len(tickers) >= ONE_HOUR {
@@ -324,10 +324,10 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
+					} else {
+						log.Println("don't match send condition", lastSendTimestampMap[v])
 					}
 				}
-			} else {
-				continue
 			}
 
 			if len(tickers) >= ONE_DAY {
@@ -345,10 +345,10 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
+					} else {
+						log.Println("don't match send condition", lastSendTimestampMap[v])
 					}
 				}
-			} else {
-				continue
 			}
 
 			if len(tickers) >= ONE_WEEK {
@@ -366,11 +366,12 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 						lastSendTimestampMap[v].LastSend = nowTimestamp
 						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
+					} else {
+						log.Println("don't match send condition", lastSendTimestampMap[v])
 					}
 				}
 			} else {
 				reportString += "\n"
-				continue
 			}
 			// reset sendTimesCount is no new reportString generated
 			if reportString == "\n" && lastSendTimestampMap[v].SendTimesCount != 0 {
