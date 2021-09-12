@@ -21,9 +21,12 @@ func main() {
 	statsProductIDs := components.Config.StatsProductIDs
 	// timing delete outdated ticker data
 	go components.DeleteOutdateTickerTiming(followProductIDs...)
+	// timing get newest ticker data to sqlite
 	go components.CreateSpecificTickersContinuousToSqlite(followProductIDs...)
 
+	// unionPay
 	e := new(components.ExchangeRateCache)
+	// freecurrency
 	ee := new(components.ExchangeMajor)
 
 	b := components.NewBot()

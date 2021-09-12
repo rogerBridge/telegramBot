@@ -269,10 +269,17 @@ const ONE_WEEK = 7 * 24 * 60 * EVERY_MINUTE_SAMPLING
 func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 	myGroup := &tb.User{ID: -1001524256686}
 
-	lastSendTimestampMap := make(map[string]int64)
-	for _, v := range args {
-		lastSendTimestampMap[v] = 0
+	type Flag struct {
+		LastSend       int64
+		SendTimesCount int
 	}
+
+	lastSendTimestampMap := make(map[string]*Flag)
+	for _, v := range args {
+		lastSendTimestampMap[v] = new(Flag)
+	}
+	const INTERVAL_ONE = 120
+	const INTERVAL_TWO = 600
 
 	for {
 		sendFlag := false
@@ -285,62 +292,97 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 				readyForAnalysis := tickers[:FIVE_MINUTES]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 5 min "+v, 0.025)
 				if r != "" {
-					if nowTimestamp-lastSendTimestampMap[v] >= 300 {
+					// first 3 times, push interval 2mins, then, push interval 10mins
+					if lastSendTimestampMap[v].SendTimesCount < 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
 						sendFlag = true
-						lastSendTimestampMap[v] = nowTimestamp
+						lastSendTimestampMap[v].LastSend = nowTimestamp
+						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
-					} else {
-						log.Printf("send interval too short, lastsend: %v, now: %v\n", lastSendTimestampMap, nowTimestamp)
+					}
+
+					if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+						sendFlag = true
+						lastSendTimestampMap[v].LastSend = nowTimestamp
+						lastSendTimestampMap[v].SendTimesCount += 1
+						reportString += r
 					}
 				}
 			} else {
 				continue
 			}
+
 			if len(tickers) >= ONE_HOUR {
 				readyForAnalysis := tickers[:ONE_HOUR]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 1 hour "+v, 0.05)
 				if r != "" {
-					if nowTimestamp-lastSendTimestampMap[v] >= 300 {
+					// first 3 times, push interval 2mins, then, push interval 10mins
+					if lastSendTimestampMap[v].SendTimesCount < 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
 						sendFlag = true
-						lastSendTimestampMap[v] = nowTimestamp
+						lastSendTimestampMap[v].LastSend = nowTimestamp
+						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
-					} else {
-						log.Printf("send interval too short, lastsend: %v, now: %v\n", lastSendTimestampMap, nowTimestamp)
+					}
+
+					if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+						sendFlag = true
+						lastSendTimestampMap[v].LastSend = nowTimestamp
+						lastSendTimestampMap[v].SendTimesCount += 1
+						reportString += r
 					}
 				}
 			} else {
 				continue
 			}
+
 			if len(tickers) >= ONE_DAY {
 				readyForAnalysis := tickers[:ONE_DAY]
-				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 24 hour "+v, 0.1)
+				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 1 day "+v, 0.1)
 				if r != "" {
-					if nowTimestamp-lastSendTimestampMap[v] >= 300 {
+					// first 3 times, push interval 2mins, then, push interval 10mins
+					if lastSendTimestampMap[v].SendTimesCount < 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
 						sendFlag = true
-						lastSendTimestampMap[v] = nowTimestamp
+						lastSendTimestampMap[v].LastSend = nowTimestamp
+						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
-					} else {
-						log.Printf("send interval too short, lastsend: %v, now: %v\n", lastSendTimestampMap, nowTimestamp)
+					}
+
+					if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+						sendFlag = true
+						lastSendTimestampMap[v].LastSend = nowTimestamp
+						lastSendTimestampMap[v].SendTimesCount += 1
+						reportString += r
 					}
 				}
 			} else {
 				continue
 			}
+
 			if len(tickers) >= ONE_WEEK {
 				readyForAnalysis := tickers[:ONE_WEEK]
-				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 7 days "+v, 0.2)
+				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last one week "+v, 0.2)
 				if r != "" {
-					if nowTimestamp-lastSendTimestampMap[v] >= 300 {
+					// first 3 times, push interval 2mins, then, push interval 10mins
+					if lastSendTimestampMap[v].SendTimesCount < 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
 						sendFlag = true
-						lastSendTimestampMap[v] = nowTimestamp
+						lastSendTimestampMap[v].LastSend = nowTimestamp
+						lastSendTimestampMap[v].SendTimesCount += 1
 						reportString += r
-					} else {
-						log.Printf("send interval too short, lastsend: %v, now: %v\n", lastSendTimestampMap, nowTimestamp)
+					}
+
+					if lastSendTimestampMap[v].SendTimesCount >= 3 && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
+						sendFlag = true
+						lastSendTimestampMap[v].LastSend = nowTimestamp
+						lastSendTimestampMap[v].SendTimesCount += 1
+						reportString += r
 					}
 				}
 			} else {
 				reportString += "\n"
 				continue
+			}
+			// 
+			if reportString == "\n" && lastSendTimestampMap[v].SendTimesCount != 0 {
+				lastSendTimestampMap[v].SendTimesCount = 0
 			}
 		}
 		log.Printf("reportString: %s, sendFlag: %v\n", reportString, sendFlag)
