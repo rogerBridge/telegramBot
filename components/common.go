@@ -40,10 +40,17 @@ func init() {
 }
 
 type BotConfig struct {
-	Token          string `json:"token"`
-	OpenWeatherAPI string `json:"openWeatherAPI"`
-	TencentKeyOne  string `json:"tencentKeyOne"`
-	TencentKeyTwo  string `json:"tencentKeyTwo"`
+	Token            string       `json:"token"`
+	OpenWeatherAPI   string       `json:"openWeatherAPI"`
+	TencentKeyOne    string       `json:"tencentKeyOne"`
+	TencentKeyTwo    string       `json:"tencentKeyTwo"`
+	CompareRange     CompareRange `json:"compareRange"`
+	FollowProductIDs []string     `json:"followProductIDs"`
+}
+
+type CompareRange struct {
+	Max float64 `json:"max"`
+	Min float64 `json:"min"`
 }
 
 func ReadConfigFromJson(path string) (*BotConfig, error) {

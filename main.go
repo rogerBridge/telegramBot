@@ -17,7 +17,7 @@ import (
 func main() {
 	components.InitSqlite()
 
-	followProductID := []string{"BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"}
+	followProductID := components.Config.FollowProductIDs
 	// timing delete outdated ticker data
 	go components.DeleteOutdateTickerTiming(followProductID...)
 	go components.CreateSpecificTickersContinuousToSqlite(followProductID...)

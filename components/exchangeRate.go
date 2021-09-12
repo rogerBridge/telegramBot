@@ -355,7 +355,7 @@ func ExchangeDaemon(b *tb.Bot) {
 		if err != nil {
 			b.Send(myGroup, err.Error())
 		} else {
-			if comparison < 0.95 || comparison > 1.05 {
+			if comparison <= Config.CompareRange.Min || comparison >= Config.CompareRange.Max {
 				b.Send(myGroup, content)
 				time.Sleep(time.Hour)
 			}
