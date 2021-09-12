@@ -161,11 +161,11 @@ func CreateSpecificTickersContinuousToSqlite(args ...string) {
 		if err != nil {
 			log.Println(err)
 		}
-		err = CreateSpecificTickers(SqliteConn, tickers, args...)
+		err = CreateSpecificTickers(SqliteConn, tickers)
 		if err != nil {
 			log.Println(err)
 		}
-		time.Sleep(6 * time.Second)
+		time.Sleep(time.Minute / EVERY_MINUTE_SAMPLING)
 	}
 }
 
@@ -175,30 +175,31 @@ func AnalysisSpecificTickers(args ...string) string {
 	log.Printf("analysis specific tickers...\n")
 	for _, v := range args {
 		tickers := QuerySpecificTicker(v)
-		if len(tickers) >= 50 {
-			readyForAnalysis := tickers[:50]
+		if len(tickers) >= FIVE_MINUTES {
+			readyForAnalysis := tickers[:FIVE_MINUTES]
 			s += AnalysisTickers(readyForAnalysis, "In last 5min "+v)
 		} else {
-			s += "data sample is too little\n"
+			s += fmt.Sprintf("%s: %s\n", v, "data sample is too little\n")
 			continue
 		}
-		if len(tickers) >= 600 {
-			readyForAnalysis := tickers[:600]
-			s += AnalysisTickers(readyForAnalysis, "In last 1 hour: "+v)
+		if len(tickers) >= ONE_HOUR {
+			readyForAnalysis := tickers[:ONE_HOUR]
+			s += AnalysisTickers(readyForAnalysis, "In last 1 hour "+v)
 		} else {
 			s += "\n"
 			continue
 		}
-		if len(tickers) >= 600*24 {
-			readyForAnalysis := tickers[:600*24]
-			s += AnalysisTickers(readyForAnalysis, "In last 1 day: "+v)
+		if len(tickers) >= ONE_DAY {
+			readyForAnalysis := tickers[:ONE_DAY]
+			s += AnalysisTickers(readyForAnalysis, "In last 1 day "+v)
 		} else {
 			s += "\n"
 			continue
 		}
-		if len(tickers) >= 600*24*7 {
-			readyForAnalysis := tickers[:600*24*7]
-			s += AnalysisTickers(readyForAnalysis, "In last 7 day: "+v)
+		if len(tickers) >= ONE_WEEK {
+			readyForAnalysis := tickers[:ONE_WEEK]
+			s += AnalysisTickers(readyForAnalysis, "In last 7 day "+v)
+			s += "\n"
 		} else {
 			s += "\n"
 			continue
@@ -208,80 +209,133 @@ func AnalysisSpecificTickers(args ...string) string {
 }
 
 func AnalysisTickers(t []*Ticker, notify string) string {
-	min := t[0].BestAsk
-	max := t[0].BestAsk
+	min := t[0]
+	max := t[0]
 	for _, v := range t {
-		if v.BestAsk < min {
-			min = v.BestAsk
+		if v.BestAsk < min.BestAsk {
+			min = v
 		}
-		if v.BestAsk > max {
-			max = v.BestAsk
+		if v.BestAsk > max.BestAsk {
+			max = v
 		}
 	}
-	return fmt.Sprintf("%s:\n max: %v, min: %v, change: %.3f%%\n", notify, max, min, 100*(max-min)/min)
+	maxTimestamp, err := time.Parse("2006-01-02T15:04:05.999Z", max.Timestamp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	maxTimestamp = maxTimestamp.In(Loc)
+	minTimestamp, err := time.Parse("2006-01-02T15:04:05.999Z", min.Timestamp)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	minTimestamp = minTimestamp.In(Loc)
+	return fmt.Sprintf("%s:\n max: %v %s, min: %v %s, change: %.3f%%\n", notify, max.BestAsk, maxTimestamp, min.BestAsk, minTimestamp, 100*(max.BestAsk-min.BestAsk)/min.BestAsk)
 }
 
 func AnalysisTickersAndOutputByPercent(t []*Ticker, notify string, compare float64) string {
-	min := t[0].BestAsk
-	max := t[0].BestAsk
+	min := t[0]
+	max := t[0]
 	for _, v := range t {
-		if v.BestAsk < min {
-			min = v.BestAsk
+		if v.BestAsk < min.BestAsk {
+			min = v
 		}
-		if v.BestAsk > max {
-			max = v.BestAsk
+		if v.BestAsk > max.BestAsk {
+			max = v
 		}
 	}
-	if (max-min)/min >= compare {
-		return fmt.Sprintf("%s:\n max: %v, min: %v, minus percent: %.3f\n", notify, max, min, (max-min)/min)
+	if (max.BestAsk-min.BestAsk)/min.BestAsk >= compare {
+		maxTimestamp, err := time.Parse("2006-01-02T15:04:05.999Z", max.Timestamp)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		maxTimestamp = maxTimestamp.In(Loc)
+		minTimestamp, err := time.Parse("2006-01-02T15:04:05.999Z", min.Timestamp)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		minTimestamp = minTimestamp.In(Loc)
+		return fmt.Sprintf("%s:\n max: %v %s, min: %v %s, minus: %.3f%%\n", notify, max.BestAsk, maxTimestamp, min.BestAsk, minTimestamp, 100*(max.BestAsk-min.BestAsk)/min.BestAsk)
 	}
 	return ""
 }
 
+const EVERY_MINUTE_SAMPLING = 1
+const FIVE_MINUTES = 5 * EVERY_MINUTE_SAMPLING
+const ONE_HOUR = 60 * EVERY_MINUTE_SAMPLING
+const ONE_DAY = 24 * 60 * EVERY_MINUTE_SAMPLING
+const ONE_WEEK = 7 * 24 * 60 * EVERY_MINUTE_SAMPLING
+
 func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 	myGroup := &tb.User{ID: -1001524256686}
+
+	lastSendTimestampMap := make(map[string]int64)
+	for _, v := range args {
+		lastSendTimestampMap[v] = 0
+	}
+
 	for {
 		sendFlag := false
 		reportString := ""
 		log.Printf("analysis specific tickers...\n")
 		for _, v := range args {
 			tickers := QuerySpecificTicker(v)
-			if len(tickers) >= 50 {
-				readyForAnalysis := tickers[:50]
-				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 5min "+v, 0.025)
+			nowTimestamp := time.Now().Unix()
+			if len(tickers) >= FIVE_MINUTES {
+				readyForAnalysis := tickers[:FIVE_MINUTES]
+				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 5 min "+v, 0.025)
 				if r != "" {
-					sendFlag = true
-					reportString += r
+					if nowTimestamp-lastSendTimestampMap[v] >= 300 {
+						sendFlag = true
+						lastSendTimestampMap[v] = nowTimestamp
+						reportString += r
+					} else {
+						log.Printf("send interval too short, lastsend: %v, now: %v\n", lastSendTimestampMap, nowTimestamp)
+					}
 				}
 			} else {
 				continue
 			}
-			if len(tickers) >= 600 {
-				readyForAnalysis := tickers[:600]
-				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 5min "+v, 0.05)
+			if len(tickers) >= ONE_HOUR {
+				readyForAnalysis := tickers[:ONE_HOUR]
+				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 1 hour "+v, 0.05)
 				if r != "" {
-					sendFlag = true
-					reportString += r
+					if nowTimestamp-lastSendTimestampMap[v] >= 300 {
+						sendFlag = true
+						lastSendTimestampMap[v] = nowTimestamp
+						reportString += r
+					} else {
+						log.Printf("send interval too short, lastsend: %v, now: %v\n", lastSendTimestampMap, nowTimestamp)
+					}
 				}
 			} else {
 				continue
 			}
-			if len(tickers) >= 600*24 {
-				readyForAnalysis := tickers[:600*24]
-				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 5min "+v, 0.1)
+			if len(tickers) >= ONE_DAY {
+				readyForAnalysis := tickers[:ONE_DAY]
+				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 24 hour "+v, 0.1)
 				if r != "" {
-					sendFlag = true
-					reportString += r
+					if nowTimestamp-lastSendTimestampMap[v] >= 300 {
+						sendFlag = true
+						lastSendTimestampMap[v] = nowTimestamp
+						reportString += r
+					} else {
+						log.Printf("send interval too short, lastsend: %v, now: %v\n", lastSendTimestampMap, nowTimestamp)
+					}
 				}
 			} else {
 				continue
 			}
-			if len(tickers) >= 600*24*7 {
-				readyForAnalysis := tickers[:600*24*7]
-				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 5min "+v, 0.2)
+			if len(tickers) >= ONE_WEEK {
+				readyForAnalysis := tickers[:ONE_WEEK]
+				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 7 days "+v, 0.2)
 				if r != "" {
-					sendFlag = true
-					reportString += r
+					if nowTimestamp-lastSendTimestampMap[v] >= 300 {
+						sendFlag = true
+						lastSendTimestampMap[v] = nowTimestamp
+						reportString += r
+					} else {
+						log.Printf("send interval too short, lastsend: %v, now: %v\n", lastSendTimestampMap, nowTimestamp)
+					}
 				}
 			} else {
 				reportString += "\n"
@@ -291,7 +345,7 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 		log.Printf("reportString: %s, sendFlag: %v\n", reportString, sendFlag)
 		if sendFlag {
 			b.Send(myGroup, reportString)
-			time.Sleep(time.Minute * 10)
+			time.Sleep(time.Minute)
 		} else {
 			time.Sleep(time.Minute)
 		}

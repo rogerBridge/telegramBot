@@ -8,7 +8,7 @@ import (
 )
 
 // get specific ticker, for example:  "BTC-USDT"
-func CreateSpecificTickers(tx *gorm.DB, tickers []*Ticker, args ...string) error {
+func CreateSpecificTickers(tx *gorm.DB, tickers []*Ticker) error {
 	err := tx.Create(&tickers).Error
 	return err
 }
@@ -23,9 +23,10 @@ func QuerySpecificTicker(arg string) []*Ticker {
 
 // args: "BTC-USDT", "ETH-USDT" ...
 func DeleteOutdateTicker(tx *gorm.DB, args ...string) error {
+	maxRange := EVERY_MINUTE_SAMPLING * 60 * 24 * 7
 	for _, v := range args {
 		tickers := QuerySpecificTicker(v)
-		if len(tickers) >= 100800 {
+		if len(tickers) >= maxRange {
 			log.Printf("%v is too much, delete it now\n", v)
 			flagID := tickers[len(tickers)-1].ID
 			err := tx.Unscoped().Where("id < ?", flagID).Delete(&Ticker{}).Error
@@ -39,11 +40,11 @@ func DeleteOutdateTicker(tx *gorm.DB, args ...string) error {
 	return nil
 }
 
-func DeleteOutdateTickerTiming() {
+func DeleteOutdateTickerTiming(args ...string) {
 	for {
 		t := time.Now()
 		if t.Hour() == 0 && t.Minute() == 0 {
-			err := DeleteOutdateTicker(SqliteConn, "BTC-USDT", "ETH-USDT")
+			err := DeleteOutdateTicker(SqliteConn, args...)
 			if err != nil {
 				log.Println(err)
 			}

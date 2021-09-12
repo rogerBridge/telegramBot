@@ -17,9 +17,10 @@ import (
 func main() {
 	components.InitSqlite()
 
+	followProductID := []string{"BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"}
 	// timing delete outdated ticker data
-	go components.DeleteOutdateTickerTiming()
-	go components.CreateSpecificTickersContinuousToSqlite("BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT")
+	go components.DeleteOutdateTickerTiming(followProductID...)
+	go components.CreateSpecificTickersContinuousToSqlite(followProductID...)
 
 	e := new(components.ExchangeRateCache)
 	ee := new(components.ExchangeMajor)
@@ -29,7 +30,7 @@ func main() {
 	// !Daemon
 	go components.WeatherDaemon(b)
 	go components.ExchangeDaemon(b)
-	go components.CryptoCurrencyDaemon(b, "BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT")
+	go components.CryptoCurrencyDaemon(b, followProductID...)
 	// !Daemon
 
 	b.Handle("/hello", func(m *tb.Message) {
