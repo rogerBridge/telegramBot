@@ -136,7 +136,8 @@ func ProcessSpecificTicker(args ...string) (string, error) {
 			log.Println(err)
 			return "", err
 		}
-		s += fmt.Sprintf("%s: ask: %v, bid: %v\n24h_high: %v, 24h_low: %v, timestamp: %v\n", v, allTickerMap[v].BestAsk, allTickerMap[v].BestBid, allTickerMap[v].High24h, allTickerMap[v].Low24h, t.Unix())
+		t = t.In(Loc)
+		s += fmt.Sprintf("%s: ask: %v, bid: %v\n24h_high: %v, 24h_low: %v, wave motion: %.3f%%, timestamp: %v\n", v, allTickerMap[v].BestAsk, allTickerMap[v].BestBid, allTickerMap[v].High24h, allTickerMap[v].Low24h, 100*(allTickerMap[v].High24h-allTickerMap[v].Low24h)/allTickerMap[v].Low24h, t)
 	}
 	return s, nil
 }
