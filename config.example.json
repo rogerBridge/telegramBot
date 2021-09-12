@@ -2,5 +2,10 @@
   "token": "xxxxx",
   "openWeatherAPI": "xxxxx",
   "tencentKeyOne": "xxx",
-  "tencentKeyTwo": "xxx"
+  "tencentKeyTwo": "xxx",
+  "compareRange": {
+    "max": 1.05,
+    "min": 0.95
+  },
+  "followProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"]
 }
