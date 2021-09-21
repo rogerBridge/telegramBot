@@ -3,6 +3,7 @@ package components
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -27,6 +28,12 @@ var FastHttpClient = &fasthttp.Client{
 
 var Loc, errLoadTimezoneLoc = time.LoadLocation("Asia/Shanghai")
 
+var (
+	WarningLogger *log.Logger
+	InfoLogger    *log.Logger
+	ErrorLogger   *log.Logger
+)
+
 func init() {
 	if errLoadConfig != nil {
 		log.Fatalln("load config error: ", errLoadConfig)
@@ -37,6 +44,17 @@ func init() {
 	if errConnectToSqlite != nil {
 		log.Fatalf("While connect to sqlite, error: %s", errConnectToSqlite)
 	}
+
+	logFile, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mw := io.MultiWriter(os.Stdout, logFile)
+
+	InfoLogger = log.New(mw, "INFO: ", log.Ldate|log.Ltime|log.Llongfile)
+	WarningLogger = log.New(mw, "WARNING: ", log.Ldate|log.Ltime|log.Llongfile)
+	ErrorLogger = log.New(mw, "ERROR: ", log.Ldate|log.Ltime|log.Llongfile)
 }
 
 type BotConfig struct {
