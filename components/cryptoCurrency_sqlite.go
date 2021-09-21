@@ -16,7 +16,7 @@ func CreateSpecificTickers(tx *gorm.DB, tickers []*Ticker) error {
 // the newer, the more forward
 func QuerySpecificTicker(arg string) []*Ticker {
 	tickers := make([]*Ticker, 0, 1024)
-	SqliteConn.Model(&Ticker{}).Where("product_id=?", arg).Order("id desc").Limit(108000).Find(&tickers)
+	SqliteConn.Model(&Ticker{}).Where("product_id=?", arg).Order("id desc").Limit(10800).Find(&tickers)
 	log.Printf("Query ticker is: %v, length of tickers is: %v\n", arg, len(tickers))
 	return tickers
 }
