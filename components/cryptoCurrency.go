@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/valyala/fasthttp"
@@ -270,9 +269,18 @@ const ONE_WEEK = 7 * 24 * 60 * EVERY_MINUTE_SAMPLING
 func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 	myGroup := &tb.User{ID: -1001524256686}
 
-	type Flag struct {
+	type Property struct {
 		LastSend       int64
 		SendTimesCount int
+		Content        string
+		IfSend         bool
+	}
+
+	type Flag struct {
+		FiveMinutes Property
+		OneHour     Property
+		OneDay      Property
+		OneWeek     Property
 	}
 
 	lastSendTimestampMap := make(map[string]*Flag)
@@ -281,8 +289,8 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 	}
 	const INTERVAL_ONE = 2 * 60
 	const INTERVAL_TWO = 60 * 60
-	const NOTIFY_NUM = 1
-	const MAX_NOTIFY_NUM = 3
+	const NOTIFY_NUM = 2
+	const MAX_NOTIFY_NUM = 5
 
 	const FIVE_MINUTES_RANGE = 0.05
 	const ONE_HOUR_RANGE = 0.1
@@ -296,91 +304,139 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 		for _, v := range args {
 			tickers := QuerySpecificTicker(v)
 			nowTimestamp := time.Now().Unix()
+
+			// five minutes
 			if len(tickers) >= FIVE_MINUTES {
 				readyForAnalysis := tickers[:FIVE_MINUTES]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 5 min "+v, FIVE_MINUTES_RANGE)
 				if r != "" {
-					reportString += r
 					// first 3 times, push interval 2mins, then, push interval 10mins
-					if lastSendTimestampMap[v].SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
-						sendFlag = true
-						lastSendTimestampMap[v].LastSend = nowTimestamp
-						lastSendTimestampMap[v].SendTimesCount += 1
-					} else if lastSendTimestampMap[v].SendTimesCount >= NOTIFY_NUM && lastSendTimestampMap[v].SendTimesCount <= MAX_NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
-						sendFlag = true
-						lastSendTimestampMap[v].LastSend = nowTimestamp
-						lastSendTimestampMap[v].SendTimesCount += 1
+					if lastSendTimestampMap[v].FiveMinutes.SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].FiveMinutes.LastSend >= INTERVAL_ONE {
+						lastSendTimestampMap[v].FiveMinutes.LastSend = nowTimestamp
+						lastSendTimestampMap[v].FiveMinutes.SendTimesCount += 1
+						lastSendTimestampMap[v].FiveMinutes.Content = r
+						lastSendTimestampMap[v].FiveMinutes.IfSend = true
+					} else if lastSendTimestampMap[v].FiveMinutes.SendTimesCount >= NOTIFY_NUM && lastSendTimestampMap[v].FiveMinutes.SendTimesCount < MAX_NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].FiveMinutes.LastSend >= INTERVAL_TWO {
+						lastSendTimestampMap[v].FiveMinutes.LastSend = nowTimestamp
+						lastSendTimestampMap[v].FiveMinutes.SendTimesCount += 1
+						lastSendTimestampMap[v].FiveMinutes.Content = r
+						lastSendTimestampMap[v].FiveMinutes.IfSend = true
 					} else {
-						log.Println("don't match send condition", lastSendTimestampMap[v])
+						log.Println("don't match send condition", lastSendTimestampMap[v].FiveMinutes)
+						lastSendTimestampMap[v].FiveMinutes.IfSend = false
 					}
+				} else {
+					lastSendTimestampMap[v].FiveMinutes.Content = ""
+					lastSendTimestampMap[v].FiveMinutes.IfSend = false
 				}
 			}
+			if lastSendTimestampMap[v].FiveMinutes.Content == "" && lastSendTimestampMap[v].FiveMinutes.SendTimesCount != 0 {
+				lastSendTimestampMap[v].FiveMinutes.SendTimesCount = 0
+			}
 
+			// one hour
 			if len(tickers) >= ONE_HOUR {
 				readyForAnalysis := tickers[:ONE_HOUR]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 1 hour "+v, ONE_HOUR_RANGE)
 				if r != "" {
-					reportString += r
 					// first 3 times, push interval 2mins, then, push interval 10mins
-					if lastSendTimestampMap[v].SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
-						sendFlag = true
-						lastSendTimestampMap[v].LastSend = nowTimestamp
-						lastSendTimestampMap[v].SendTimesCount += 1
-					} else if lastSendTimestampMap[v].SendTimesCount >= NOTIFY_NUM && lastSendTimestampMap[v].SendTimesCount <= MAX_NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
-						sendFlag = true
-						lastSendTimestampMap[v].LastSend = nowTimestamp
-						lastSendTimestampMap[v].SendTimesCount += 1
+					if lastSendTimestampMap[v].OneHour.SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].OneHour.LastSend >= INTERVAL_ONE {
+						lastSendTimestampMap[v].OneHour.LastSend = nowTimestamp
+						lastSendTimestampMap[v].OneHour.SendTimesCount += 1
+						lastSendTimestampMap[v].OneHour.Content = r
+						lastSendTimestampMap[v].OneHour.IfSend = true
+					} else if lastSendTimestampMap[v].OneHour.SendTimesCount >= NOTIFY_NUM && lastSendTimestampMap[v].OneHour.SendTimesCount < MAX_NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].OneHour.LastSend >= INTERVAL_TWO {
+						lastSendTimestampMap[v].OneHour.LastSend = nowTimestamp
+						lastSendTimestampMap[v].OneHour.SendTimesCount += 1
+						lastSendTimestampMap[v].OneHour.Content = r
+						lastSendTimestampMap[v].OneHour.IfSend = true
 					} else {
-						log.Println("don't match send condition", lastSendTimestampMap[v])
+						log.Println("don't match send condition", lastSendTimestampMap[v].FiveMinutes)
+						lastSendTimestampMap[v].OneHour.IfSend = false
 					}
+				} else {
+					lastSendTimestampMap[v].OneHour.Content = ""
+					lastSendTimestampMap[v].OneHour.IfSend = false
 				}
 			}
+			if lastSendTimestampMap[v].OneHour.Content == "" && lastSendTimestampMap[v].OneHour.SendTimesCount != 0 {
+				lastSendTimestampMap[v].OneHour.SendTimesCount = 0
+			}
 
+			// one day
 			if len(tickers) >= ONE_DAY {
 				readyForAnalysis := tickers[:ONE_DAY]
 				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 1 day "+v, ONE_DAY_RANGE)
 				if r != "" {
-					reportString += r
 					// first 3 times, push interval 2mins, then, push interval 10mins
-					if lastSendTimestampMap[v].SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
-						sendFlag = true
-						lastSendTimestampMap[v].LastSend = nowTimestamp
-						lastSendTimestampMap[v].SendTimesCount += 1
-					} else if lastSendTimestampMap[v].SendTimesCount >= NOTIFY_NUM && lastSendTimestampMap[v].SendTimesCount <= MAX_NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
-						sendFlag = true
-						lastSendTimestampMap[v].LastSend = nowTimestamp
-						lastSendTimestampMap[v].SendTimesCount += 1
+					if lastSendTimestampMap[v].OneDay.SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].OneDay.LastSend >= INTERVAL_ONE {
+						lastSendTimestampMap[v].OneDay.LastSend = nowTimestamp
+						lastSendTimestampMap[v].OneDay.SendTimesCount += 1
+						lastSendTimestampMap[v].OneDay.Content = r
+						lastSendTimestampMap[v].OneDay.IfSend = true
+					} else if lastSendTimestampMap[v].OneDay.SendTimesCount >= NOTIFY_NUM && lastSendTimestampMap[v].OneDay.SendTimesCount < MAX_NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].OneDay.LastSend >= INTERVAL_TWO {
+						lastSendTimestampMap[v].OneDay.LastSend = nowTimestamp
+						lastSendTimestampMap[v].OneDay.SendTimesCount += 1
+						lastSendTimestampMap[v].OneDay.Content = r
+						lastSendTimestampMap[v].OneDay.IfSend = true
 					} else {
-						log.Println("don't match send condition", lastSendTimestampMap[v])
+						log.Println("don't match send condition", lastSendTimestampMap[v].OneDay)
+						lastSendTimestampMap[v].OneDay.IfSend = false
 					}
+				} else {
+					lastSendTimestampMap[v].OneDay.Content = ""
+					lastSendTimestampMap[v].OneDay.IfSend = false
 				}
 			}
+			if lastSendTimestampMap[v].OneDay.Content == "" && lastSendTimestampMap[v].OneDay.SendTimesCount != 0 {
+				lastSendTimestampMap[v].OneDay.SendTimesCount = 0
+			}
 
+			// one week
 			if len(tickers) >= ONE_WEEK {
 				readyForAnalysis := tickers[:ONE_WEEK]
-				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last one week "+v, ONE_WEEK_RANGE)
+				r := AnalysisTickersAndOutputByPercent(readyForAnalysis, "In last 1 week "+v, ONE_WEEK_RANGE)
 				if r != "" {
-					reportString += r
 					// first 3 times, push interval 2mins, then, push interval 10mins
-					if lastSendTimestampMap[v].SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_ONE {
-						sendFlag = true
-						lastSendTimestampMap[v].LastSend = nowTimestamp
-						lastSendTimestampMap[v].SendTimesCount += 1
-					} else if lastSendTimestampMap[v].SendTimesCount >= NOTIFY_NUM && lastSendTimestampMap[v].SendTimesCount <= MAX_NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].LastSend >= INTERVAL_TWO {
-						sendFlag = true
-						lastSendTimestampMap[v].LastSend = nowTimestamp
-						lastSendTimestampMap[v].SendTimesCount += 1
+					if lastSendTimestampMap[v].OneWeek.SendTimesCount < NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].OneWeek.LastSend >= INTERVAL_ONE {
+						lastSendTimestampMap[v].OneWeek.LastSend = nowTimestamp
+						lastSendTimestampMap[v].OneWeek.SendTimesCount += 1
+						lastSendTimestampMap[v].OneWeek.Content = r
+						lastSendTimestampMap[v].OneWeek.IfSend = true
+					} else if lastSendTimestampMap[v].OneWeek.SendTimesCount >= NOTIFY_NUM && lastSendTimestampMap[v].OneWeek.SendTimesCount < MAX_NOTIFY_NUM && nowTimestamp-lastSendTimestampMap[v].OneWeek.LastSend >= INTERVAL_TWO {
+						lastSendTimestampMap[v].OneWeek.LastSend = nowTimestamp
+						lastSendTimestampMap[v].OneWeek.SendTimesCount += 1
+						lastSendTimestampMap[v].OneWeek.Content = r
+						lastSendTimestampMap[v].OneWeek.IfSend = true
 					} else {
-						log.Println("don't match send condition", lastSendTimestampMap[v])
+						log.Println("don't match send condition", lastSendTimestampMap[v].OneWeek)
+						lastSendTimestampMap[v].OneWeek.IfSend = false
 					}
+				} else {
+					lastSendTimestampMap[v].OneWeek.Content = ""
+					lastSendTimestampMap[v].OneWeek.IfSend = false
 				}
-			} else {
-				reportString += "\n"
+			}
+			if lastSendTimestampMap[v].OneWeek.Content == "" && lastSendTimestampMap[v].OneWeek.SendTimesCount != 0 {
+				lastSendTimestampMap[v].OneWeek.SendTimesCount = 0
 			}
 
-			// reset sendTimesCount is no new reportString generated
-			if len(strings.ReplaceAll(reportString, "\n", "")) == 0 && lastSendTimestampMap[v].SendTimesCount != 0 {
-				lastSendTimestampMap[v].SendTimesCount = 0
+			// combine reportString
+			if lastSendTimestampMap[v].FiveMinutes.IfSend {
+				sendFlag = true
+				reportString += lastSendTimestampMap[v].FiveMinutes.Content
+			}
+			if lastSendTimestampMap[v].OneHour.IfSend {
+				sendFlag = true
+				reportString += lastSendTimestampMap[v].OneHour.Content
+			}
+			if lastSendTimestampMap[v].OneDay.IfSend {
+				sendFlag = true
+				reportString += lastSendTimestampMap[v].OneDay.Content
+			}
+			if lastSendTimestampMap[v].OneWeek.IfSend {
+				sendFlag = true
+				reportString += lastSendTimestampMap[v].OneWeek.Content
 			}
 		}
 		log.Printf("reportString: %s, sendFlag: %v\n", reportString, sendFlag)

@@ -249,38 +249,31 @@ func WeatherDaemon(b *tb.Bot, cityName string) {
 		rainList := make([]Hourly, 0, 24)
 		switch h {
 		case 23, 0, 1, 2, 3, 4, 5, 6:
-		case 8, 18:
-			if m == 0 {
-				weather, err := GetWeather(queryCity)
-				if err != nil {
-					b.Send(myGroup, err.Error())
-				} else {
-					for i, v := range weather.Hourly {
-						if i < 24 && v.Weather[0].Main == "Rain" && v.Pop > Possibility {
-							rainList = append(rainList, v)
-						}
-					}
-				}
-			}
 		default:
 			// future 3 hours
-			if m == 0 {
-				weather, err := GetWeather(queryCity)
-				if err != nil {
-					b.Send(myGroup, err.Error())
-				} else {
-					for i, v := range weather.Hourly {
-						if i < 3 && v.Weather[0].Main == "Rain" && v.Pop > HighPossibility {
-							rainList = append(rainList, v)
-						}
+			weather, err := GetWeather(queryCity)
+			if err != nil {
+				b.Send(myGroup, err.Error())
+			} else if h == 18 && m == 0 || h == 8 && m == 0 {
+				for i, v := range weather.Hourly {
+					if i < 24 && v.Weather[0].Main == "Rain" && v.Pop > Possibility {
+						rainList = append(rainList, v)
+					}
+				}
+			} else {
+				for i, v := range weather.Hourly {
+					if i < 3 && v.Weather[0].Main == "Rain" && v.Pop > HighPossibility {
+						rainList = append(rainList, v)
 					}
 				}
 			}
 		}
 		if len(rainList) > 0 {
 			b.Send(myGroup, processRainList(rainList))
+			time.Sleep(time.Hour)
+		} else {
+			time.Sleep(time.Minute)
 		}
-		time.Sleep(time.Minute)
 	}
 }
 
