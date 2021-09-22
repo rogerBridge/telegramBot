@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"strconv"
 	"time"
@@ -15,6 +16,7 @@ import (
 )
 
 func main() {
+	log.Printf("%+v\n", components.Config)
 	components.InitSqlite()
 
 	followProductIDs := components.Config.FollowProductIDs

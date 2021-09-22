@@ -287,15 +287,15 @@ func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
 	for _, v := range args {
 		lastSendTimestampMap[v] = new(Flag)
 	}
-	const INTERVAL_ONE = 2 * 60
-	const INTERVAL_TWO = 60 * 60
-	const NOTIFY_NUM = 2
-	const MAX_NOTIFY_NUM = 5
+	var INTERVAL_ONE = Config.IntervalOne
+	var INTERVAL_TWO = Config.IntervalTwo
+	var NOTIFY_NUM = Config.FirstNotifyNum
+	var MAX_NOTIFY_NUM = Config.SecondNotifyNum
 
-	const FIVE_MINUTES_RANGE = 0.05
-	const ONE_HOUR_RANGE = 0.1
-	const ONE_DAY_RANGE = 0.2
-	const ONE_WEEK_RANGE = 0.3
+	var FIVE_MINUTES_RANGE = Config.FiveMinutesRange
+	var ONE_HOUR_RANGE = Config.OneHourRange
+	var ONE_DAY_RANGE = Config.OneDayRange
+	var ONE_WEEK_RANGE = Config.OneWeekRange
 
 	for {
 		sendFlag := false

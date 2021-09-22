@@ -66,6 +66,14 @@ type BotConfig struct {
 	FollowProductIDs []string     `json:"followProductIDs"`
 	StatsProductIDs  []string     `json:"statsProductIDs"`
 	FollowCity       string       `json:"followCity"`
+	IntervalOne      int64        `json:"intervalOne"`
+	IntervalTwo      int64        `json:"intervalTwo"`
+	FirstNotifyNum   int          `json:"firstNotifyNum"`
+	SecondNotifyNum  int          `json:"secondNotifyNum"`
+	FiveMinutesRange float64      `json:"fiveMinutesRange"`
+	OneHourRange     float64      `json:"oneHourRange"`
+	OneDayRange      float64      `json:"oneDayRange"`
+	OneWeekRange     float64      `json:"oneWeekRange"`
 }
 
 type CompareRange struct {
