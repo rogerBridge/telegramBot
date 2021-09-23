@@ -23,7 +23,7 @@
 
 ## Settings
 
-```json
+```jsonc
 {
   "token": "xxxxx", // bot的token
   "openWeatherAPI": "xxxxx",
@@ -48,6 +48,8 @@
 ```
 
 ## 使用方法
+
+1. 自己编译 docker image
 
 ```bash
 # 默认你已安装docker
