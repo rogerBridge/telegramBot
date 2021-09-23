@@ -20,3 +20,42 @@
 - 加密货币波动分析(3% in 5min, 6% in 1hour, 10% in 1day, 20% in 7day, 可在配置文件里面自定义观测的 followProductIDs), 每分钟统计一次, 波动超过设定数值将会推送
 - USDT/USD 比值推送, (上限 1.05, 下限 0.95, 可在配置文件里自定义)
 - 加密货币波动分析推送方式优化: 前 2 次, 推送间隔 2mins, 之后, 推送间隔 60mins, 最大次数 5 次, 直到被重置, 参数可以在配置文件中自己配置, 推送分为两个阶段, 第一阶段, 推送间隔 x mins, 推送次数为 y, 第二阶段, 推送间隔为 a mins, 推送间隔为 b, 直到重置(重置条件: 一轮检测下来没有触发推送 && 此时的推送次数!=0), 参数可在配置文件中自定义
+
+## Settings
+
+```json
+{
+  "token": "xxxxx", // bot的token
+  "openWeatherAPI": "xxxxx",
+  "tencentKeyOne": "xxx", // tencent cloud API, secretID
+  "tencentKeyTwo": "xxx", // tencent cloud API, secretKEY
+  "compareRange": {
+    "max": 1.05, // usdt/usd 波动上限
+    "min": 0.95 // usdt/usd 波动下限
+  },
+  "followProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"], // 关注的加密货币交易对
+  "statsProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"], // 查询的加密货币交易对
+  "followCity": "Hangzhou", // 天气推送的关注城市
+  "intervalOne": 120, // 第一个推送阶段的间隔(秒)
+  "intervalTwo": 3600, // 担儿个推送阶段的间隔(秒)
+  "firstNotifyNum": 2, // 第一个推送阶段的推送次数
+  "secondNotifyNum": 5, // 第二个推送阶段的累计推送次数
+  "fiveMinutesRange": 0.025, // 五分钟变化范围超过2.5%就会推送
+  "oneHourRange": 0.05, // 一小时变化范围超过5%就会推送
+  "oneDayRange": 0.1, // 一天变化范围超过10%就会推送
+  "oneWeekRange": 0.2 // 一周变化范围超过20%就会推送
+}
+```
+
+## 使用方法
+
+```bash
+# 默认你已安装docker
+mv config.example.json bot-config.json
+user=test # 自己的用户名, 例如: test, 如果你打算推送到自己的docke-hub, 那就写docker-hub的名字, 否则随便填
+version=0.0 # 版本号, 随便填, 例如: 0.0
+docker build -t $(user)/botmsg:$(version)
+docker run -d --name=botmsg $(user)/botmsg:$(version)
+# 查看执行情况
+docker logs -f --tail=200 botmsg
+```
