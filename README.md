@@ -37,7 +37,7 @@
   "statsProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"], // 查询的加密货币交易对
   "followCity": "Hangzhou", // 天气推送的关注城市
   "intervalOne": 120, // 第一个推送阶段的间隔(秒)
-  "intervalTwo": 3600, // 担儿个推送阶段的间隔(秒)
+  "intervalTwo": 3600, // 第二个推送阶段的间隔(秒)
   "firstNotifyNum": 2, // 第一个推送阶段的推送次数
   "secondNotifyNum": 5, // 第二个推送阶段的累计推送次数
   "fiveMinutesRange": 0.025, // 五分钟变化范围超过2.5%就会推送
