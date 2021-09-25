@@ -268,7 +268,7 @@ func WeatherDaemon(b *tb.Bot, cityName string) {
 				}
 			} else {
 				for i, v := range weather.Hourly {
-					if i < 3 && v.Weather[0].Main == "Rain" && v.Pop > HighPossibility {
+					if i < 6 && v.Weather[0].Main == "Rain" && v.Pop > HighPossibility {
 						rainList = append(rainList, v)
 					}
 				}

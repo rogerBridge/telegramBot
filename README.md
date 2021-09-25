@@ -11,7 +11,7 @@
 ## Function
 
 - 天气查询, 输入城市名称(ps: 目前仅支持拼音, 例如: hangzhou, beijing)
-- 天气预告, 每天 8:00, 18:00 查询未来 24 小时内的天气, 将有雨的情况推送给用户(支持自定义, 在配置文件里面可以自己修改, 默认: 杭州市), 每天除[23, 6]之外, 每分钟统计一次最近三小时内的天气情况, 如果下雨, 推送消息给用户, 推送之后一小时之内不推送
+- 天气预告, 每天 8:00, 18:00 查询未来 24 小时内的天气, 将有雨的情况推送给用户(支持自定义, 支持多城市观察, 在配置文件里面可以自己修改, 默认: []string{"Hangzhou", "Beijing"}), 每天除[23, 6]之外, 每 5 分钟统计一次最近 6 小时内的天气情况, 如果下雨, 推送消息给用户, 推送之后 1 小时之内不推送 (因为 openWeatherAPI 限制调用次数: 100k/month, 每天大约可以调用 3000 次, 所以最多同时观察 15 个城市)
 - 腾讯云 VPS 流量查询
 - 打卡(废除)
 - 汇率查询(银联数据(时效不好), freecurrency 数据(不太准), oanda 数据(推荐))
@@ -35,7 +35,7 @@
   },
   "followProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"], // 关注的加密货币交易对
   "statsProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"], // 查询的加密货币交易对
-  "followCity": "Hangzhou", // 天气推送的关注城市
+  "followCities": ["Hangzhou", "Beijing"], // 天气推送的关注城市
   "intervalOne": 120, // 第一个推送阶段的间隔(秒)
   "intervalTwo": 3600, // 第二个推送阶段的间隔(秒)
   "firstNotifyNum": 2, // 第一个推送阶段的推送次数
@@ -43,7 +43,8 @@
   "fiveMinutesRange": 0.025, // 五分钟变化范围超过2.5%就会推送
   "oneHourRange": 0.05, // 一小时变化范围超过5%就会推送
   "oneDayRange": 0.1, // 一天变化范围超过10%就会推送
-  "oneWeekRange": 0.2 // 一周变化范围超过20%就会推送
+  "oneWeekRange": 0.2, // 一周变化范围超过20%就会推送
+  "sendToID": 615491801 // 消息推送receiver的ID, 比如: 你的用户ID, 你的群组ID
 }
 ```
 
