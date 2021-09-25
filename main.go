@@ -34,7 +34,7 @@ func main() {
 	b := components.NewBot()
 
 	// !Daemon
-	go components.WeatherDaemon(b, components.Config.FollowCity)
+	go components.MultiWeatherDaemon(b, components.Config.FollowCities)
 	go components.ExchangeDaemon(b)
 	go components.CryptoCurrencyDaemon(b, followProductIDs...)
 	// !Daemon

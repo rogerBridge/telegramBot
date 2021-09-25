@@ -267,7 +267,7 @@ const ONE_DAY = 24 * 60 * EVERY_MINUTE_SAMPLING
 const ONE_WEEK = 7 * 24 * 60 * EVERY_MINUTE_SAMPLING
 
 func CryptoCurrencyDaemon(b *tb.Bot, args ...string) {
-	myGroup := &tb.User{ID: -1001524256686}
+	myGroup := &tb.User{ID: Config.SendToID}
 
 	type Property struct {
 		LastSend       int64

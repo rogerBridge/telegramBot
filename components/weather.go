@@ -215,8 +215,14 @@ func GetGeocodingByName(cityName string) ([]*Geocoding, error) {
 	return result, nil
 }
 
+func MultiWeatherDaemon(b *tb.Bot, followCities []string) {
+	for _, v := range followCities {
+		go WeatherDaemon(b, v)
+	}
+}
+
 func WeatherDaemon(b *tb.Bot, cityName string) {
-	var myGroup = &tb.User{ID: -1001524256686}
+	var myGroup = &tb.User{ID: Config.SendToID}
 	// get city info by cityName
 	log.Println("weather bot daemon ...")
 	// every new start, get a weather data and send to myGroup
@@ -272,7 +278,7 @@ func WeatherDaemon(b *tb.Bot, cityName string) {
 			b.Send(myGroup, processRainList(rainList))
 			time.Sleep(time.Hour)
 		} else {
-			time.Sleep(time.Minute)
+			time.Sleep(time.Minute * 5)
 		}
 	}
 }

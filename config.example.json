@@ -9,7 +9,7 @@
   },
   "followProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"],
   "statsProductIDs": ["BTC-USDT", "ETH-USDT", "ALGO-USDT", "SOL-USDT"],
-  "followCity": "Hangzhou",
+  "followCities": ["Hangzhou"],
   "intervalOne": 120,
   "intervalTwo": 3600,
   "firstNotifyNum": 2,
@@ -17,5 +17,6 @@
   "fiveMinutesRange": 0.025,
   "oneHourRange": 0.05,
   "oneDayRange": 0.1,
-  "oneWeekRange": 0.2
+  "oneWeekRange": 0.2,
+  "sendToID": 615491801
 }

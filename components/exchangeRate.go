@@ -336,7 +336,7 @@ func ExchangeBetweenUSDandUSDT() (string, float64, error) {
 }
 
 func ExchangeDaemon(b *tb.Bot) {
-	myGroup := &tb.User{ID: -1001524256686}
+	myGroup := &tb.User{ID: Config.SendToID}
 	for {
 		now := time.Now().In(Loc)
 		content, comparison, err := ExchangeBetweenUSDandUSDT()
