@@ -10,3 +10,4 @@ exchange_rate_freecurrency - get exchange rate from freecurrency
 exchange_rate_oanda - get exchange rate from oanda
 crypto_currency_stats - get crypto currency stats from okex
 crypto_currency_reports - get crypto currency reports recently
+usdt - get usdt/usd

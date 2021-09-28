@@ -16,6 +16,10 @@ import (
 	"gorm.io/gorm"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Ldate | log.Ltime)
+}
+
 var Config, errLoadConfig = ReadConfigFromJson("./bot-config.json")
 
 var FastHttpClient = &fasthttp.Client{

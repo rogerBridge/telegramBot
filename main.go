@@ -192,6 +192,15 @@ func main() {
 		b.Reply(m, s)
 	})
 
+	b.Handle("/usdt", func(m *tb.Message) {
+		r, _, err := components.ExchangeBetweenUSDandUSDT()
+		if err != nil {
+			b.Reply(m, err)
+		} else {
+			b.Reply(m, r)
+		}
+	})
+
 	b.Start()
 
 }

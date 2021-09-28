@@ -217,6 +217,7 @@ func GetGeocodingByName(cityName string) ([]*Geocoding, error) {
 
 func MultiWeatherDaemon(b *tb.Bot, followCities []string) {
 	for _, v := range followCities {
+		time.Sleep(10 * time.Second)
 		go WeatherDaemon(b, v)
 	}
 }
@@ -228,7 +229,8 @@ func WeatherDaemon(b *tb.Bot, cityName string) {
 	// every new start, get a weather data and send to myGroup
 	geocodings, err := GetGeocodingByName(cityName)
 	if err != nil {
-		b.Send(myGroup, err)
+		log.Println("GetGeocodingByName: ", err)
+		// b.Send(myGroup, err)
 		return
 	}
 	geocoding := geocodings[0]
@@ -239,7 +241,8 @@ func WeatherDaemon(b *tb.Bot, cityName string) {
 	}
 	data, err := GetWeather(queryCity)
 	if err != nil {
-		b.Send(myGroup, err)
+		log.Println("GetWeather: ", err)
+		// b.Send(myGroup, err)
 		return
 	}
 	currentWeather := fmt.Sprintf("%s temprature:%.2f°C\nFeels like:%.2f°C\nWind speed: %.2fm/s\nWeather: %s\nTimezone: %s\nTime offset: %dh\n", cityName,
@@ -259,7 +262,8 @@ func WeatherDaemon(b *tb.Bot, cityName string) {
 			// future 3 hours
 			weather, err := GetWeather(queryCity)
 			if err != nil {
-				b.Send(myGroup, err.Error())
+				log.Println("while get weather information, error happen :)", err.Error())
+				// b.Send(myGroup, err.Error())
 			} else if h == 18 && m == 0 || h == 8 && m == 0 {
 				for i, v := range weather.Hourly {
 					if i < 24 && v.Weather[0].Main == "Rain" && v.Pop > Possibility {
@@ -275,7 +279,7 @@ func WeatherDaemon(b *tb.Bot, cityName string) {
 			}
 		}
 		if len(rainList) > 0 {
-			b.Send(myGroup, processRainList(rainList))
+			b.Send(myGroup, processRainList(rainList, cityName))
 			time.Sleep(time.Hour)
 		} else {
 			time.Sleep(time.Minute * 5)
@@ -283,7 +287,7 @@ func WeatherDaemon(b *tb.Bot, cityName string) {
 	}
 }
 
-func processRainList(rainList []Hourly) string {
+func processRainList(rainList []Hourly, cityName string) string {
 	result := ""
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	if err != nil {
@@ -295,7 +299,7 @@ func processRainList(rainList []Hourly) string {
 		dateFormat := date.Format("2006-01-02 15:04:05")
 		dateFormat1 := date.Add(time.Hour).Format("2006-01-02 15:04:05")
 		//dateFormatAfterOneHour := date.Add(time.Hour).Format("2006-01-02 15:04:05")
-		result += fmt.Sprintf("At:%s - %s\nTemprature:%.2f°C\nFeels like: %.2f°C\nWeather: %s\nPossibility: %.2f\n========\n", dateFormat, dateFormat1, v.Temp+KELVIN, v.FeelsLike+KELVIN, v.Weather[0].Main, v.Pop)
+		result += fmt.Sprintf("%s At:%s - %s\nTemprature:%.2f°C\nFeels like: %.2f°C\nWeather: %s\nPossibility: %.2f\n========\n", cityName, dateFormat, dateFormat1, v.Temp+KELVIN, v.FeelsLike+KELVIN, v.Weather[0].Main, v.Pop)
 	}
 	return result
 }
